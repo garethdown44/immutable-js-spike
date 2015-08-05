@@ -12,10 +12,11 @@ settings = module.exports;
 var _state = Immutable.Map();
 
 settings.getOrCreateInstance = function(appKey) {
-  // ensure _state has instance
-
+  
   var app = _state.get(appKey);
   if (!app) {
+
+    debug('ADDING A NEW APP');
 
     var instance = createDefaultInstance(appKey, 0);
     var appInfo = createAppInfo(appKey, instance);
@@ -23,17 +24,30 @@ settings.getOrCreateInstance = function(appKey) {
     _state = _state.set(appKey, appInfo);
   } else {
 
+    debug('ADDING ANOTHER INSTANCE');
+
     // add another running instance
     var app = _state.get(appKey);
     var instance = createDefaultInstance(appKey, app.get('runningInstances').count());
 
-    var runningInstances = app.get('runningInstances').push(instance.InstanceKey);
+    debug('pushing another instance onto runningInstances...');
+    var runningInstances = app.get('runningInstances');
+    runningInstances = runningInstances.push(instance.InstanceKey);
 
+    app = app.set('runningInstances', runningInstances);
+
+    debug('app now looks like this:');
+    debug(app);
+
+    debug('adding another availableInstance');
     var availableInstances = app.get('availableInstances');
     availableInstances = availableInstances.set(instance.InstanceKey, instance);
 
-    app = app.set('runningInstances', runningInstances);
     app = app.set('availableInstances', availableInstances);
+
+    debug('app looks like this now: ');
+    debug(app);
+
     _state = _state.set(appKey, app);
   }
 
@@ -51,9 +65,7 @@ settings.getOrCreateInstance = function(appKey) {
 
 settings.saveInstance = function(instance) {
   var appKey = instance.AppKey;
-  var instanceKey = instance.InstanceKey;
-
-  //_state.set('GM');
+  var instanceKey = instance.InstanceKey;  
 };
 
 settings.allState = function() {
